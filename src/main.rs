@@ -34,9 +34,6 @@ fn runes_from_words(words: Vec<Word>) -> String {
 fn main() {
     let args = Args::parse();
 
-    println!("Input file: {:?}", args.input);
-    println!("Output file: {:?}", args.output);
-
     let input = std::fs::read_to_string(&args.input).expect("Failed to read input file");
     let mut words: Vec<Word> = Vec::new();
     let mut word_buffer: String = String::new();
@@ -57,8 +54,6 @@ fn main() {
             }
         }
     }
-    
-    println!("Words: {}", words.len());
 
     let mut group_builder = WordGroupConstructor::new(words);
     if let Some(groups) = group_builder.construct() {
@@ -66,8 +61,6 @@ fn main() {
             output.push_str(&group.to_string())
         }
     }
-
-    println!("Runes: {:?}", output);
     
     if let Some(output_path) = args.output {
         std::fs::write(output_path, output).expect("Failed to write output file");

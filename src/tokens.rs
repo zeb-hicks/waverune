@@ -209,7 +209,6 @@ impl WordGroupConstructor {
 
     pub fn construct(&mut self) -> Option<Vec<WordGroup>> {
         while let Some(word) = self.reader.next() {
-            println!("Word: {:?}", word);
             let repeats = self.reader.count_ahead(|w| w == word);
             let repeat = if repeats > 0 { Some(repeats) } else { None };
             let w = word.value();
@@ -237,8 +236,6 @@ impl WordGroupConstructor {
                 },
             });
             self.reader.advance(repeats);
-            println!("Added: {:?}", self.groups.last());
-            println!("Repeast: {:?}", repeats);
         }
 
         Some(self.groups.clone())
