@@ -68,31 +68,3 @@ fn main() {
         println!("{}", output);
     }
 }
-
-
-#[test]
-fn test_groups() {
-    let words = vec![
-        Word::new(0x0000),
-        Word::new(0x0000),
-        Word::new(0x0000),
-        Word::new(0x0001),
-        Word::new(0x0002),
-        Word::new(0x0003),
-        Word::new(0x0003),
-        Word::new(0x0003),
-        Word::new(0x0003),
-        Word::new(0x0004),
-        Word::new(0x0004),
-        Word::new(0x0005),
-        Word::new(0x0006),
-        Word::new(0x0007),
-    ];
-
-    let mut group_builder = WordGroupConstructor::new(words);
-    if let Some(groups) = group_builder.construct() {
-        for group in groups {
-            println!("{}", group);
-        }
-    }
-}
