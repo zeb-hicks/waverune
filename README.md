@@ -7,6 +7,10 @@ Supports:
 - Repeat arbitrary values
 - Sparse word high/low alignment
 
+Todo:
+- Add a deflate mode for rune -> hex conversion
+- Clean this garbage fire of a codebase up
+
 ### Usage:
 `waverune <input_file> [-o <output_file>]`
 
