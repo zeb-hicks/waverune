@@ -47,7 +47,7 @@ fn main() {
             output.push_str(&group.to_string())
         }
     }
-    
+
     if let Some(output_path) = args.output {
         std::fs::write(output_path, output).expect("Failed to write output file");
     } else {
