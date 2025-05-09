@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use crate::word::Word;
 
 use clap::Parser;
-use tokens::{parse_word_groups, WordGroup, WordGroupConstructor, WordReader};
+use tokens::WordGroupConstructor;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -15,20 +15,6 @@ struct Args {
 
     #[arg(short, long)]
     output: Option<PathBuf>,
-}
-
-fn runes_from_words(words: Vec<Word>) -> String {
-    let mut output = String::new();
-    let mut witer = words.iter();
-
-    while match witer.next() {
-        Some(word) => {
-            true
-        },
-        None => false,
-    }{}
-
-    output
 }
 
 fn main() {

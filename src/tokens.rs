@@ -87,45 +87,6 @@ fn test_word_groups() {
     assert_eq!(string_to_rune(&WordGroup::LowByte(0x42, Some(5)).to_string()), "ᛈᛁ×ᛇᚠ");
 }
 
-pub fn parse_word_groups(input: Vec<Word>) -> Vec<WordGroup> {
-    let mut groups = Vec::new();
-    let mut reader = WordReader {
-        words: input,
-        index: 0,
-    };
-
-    while let Some(word) = reader.next() {
-        let repeats = reader.count_ahead(|w| w == word);
-        let repeat = if repeats > 0 { Some(repeats) } else { None };
-        let w = word.value();
-        let a = if (w & 0xf000) == w { 0b1000 } else { 0 };
-        let b = if (w & 0x0f00) == w { 0b0100 } else { 0 };
-        let c = if (w & 0x00f0) == w { 0b0010 } else { 0 };
-        let d = if (w & 0x000f) == w { 0b0001 } else { 0 };
-        let bits = a | b | c | d;
-        groups.push(match bits {
-            0b1000 => WordGroup::HighNibble(word.value() as u16, repeat),
-            0b1100 => WordGroup::HighByte(word.value() as u16, repeat),
-            0b0011 => WordGroup::LowByte(word.value() as u16, repeat),
-            0b0001 => WordGroup::LowNibble(word.value() as u16, repeat),
-            _ => {
-                match w {
-                    0 => match repeats {
-                        0 => WordGroup::Zero,
-                        _ => WordGroup::ZeroChain(repeats + 1),
-                    },
-                    _ => match repeats {
-                        0 => WordGroup::Word(word),
-                        _ => WordGroup::WordChain(word, repeats + 1),
-                    }
-                }
-            },
-        });
-    }
-
-    groups
-}
-
 #[test]
 fn test_word_group_reader() {
     let words = vec![
