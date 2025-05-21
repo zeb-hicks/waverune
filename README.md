@@ -1,6 +1,11 @@
 # Waverune
 Tool for converting [Wave2](https://github.com/Meisaka/MeiVM2/) hex bytecode into runes.
 
+See also:
+- https://github.com/Meisaka/MeiVM2/
+- https://github.com/zeb-hicks/wave2_assembler
+- https://marketplace.visualstudio.com/items?itemName=Nimphious.wave2-assembly
+
 Supports:
 - Basic hex to rune conversion
 - Conversion of [w2s binary files](https://github.com/zeb-hicks/wave2_assembler).
