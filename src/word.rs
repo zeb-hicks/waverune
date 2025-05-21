@@ -24,6 +24,22 @@ impl From<u16> for Word {
     }
 }
 
+impl From<String> for Word {
+    fn from(value: String) -> Self {
+        let mut word = 0u16;
+        for c in value.chars() {
+            word <<= 4;
+            match c {
+                '0'..='9' => word |= c as u16 - '0' as u16,
+                'a'..='f' => word |= c as u16 - 'a' as u16 + 10,
+                'A'..='F' => word |= c as u16 - 'A' as u16 + 10,
+                _ => panic!("Invalid character in hex string"),
+            }
+        }
+        Word::new(word)
+    }
+}
+
 impl From<i32> for Word {
     fn from(value: i32) -> Self {
         Word::new(value as u16)

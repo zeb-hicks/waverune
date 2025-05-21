@@ -28,6 +28,32 @@ pub fn char_to_rune(c: char) -> Option<char> {
     }
 }
 
+pub fn rune_to_char(c: char) -> Option<char> {
+    match c {
+        'ᚺ' => Some('0'),
+        'ᚾ' => Some('1'),
+        'ᛁ' => Some('2'),
+        'ᛃ' => Some('3'),
+        'ᛈ' => Some('4'),
+        'ᛇ' => Some('5'),
+        'ᛉ' => Some('6'),
+        'ᛊ' => Some('7'),
+        'ᛏ' => Some('8'),
+        'ᛒ' => Some('9'),
+        'ᛖ' => Some('a'),
+        'ᛗ' => Some('b'),
+        'ᛚ' => Some('c'),
+        'ᛜ' => Some('d'),
+        'ᛞ' => Some('e'),
+        'ᛟ' => Some('f'),
+        'ᚱ' => Some('*'),
+        'ᚠ' => Some('z'),
+        'ᚲ' => Some('<'),
+        '×' => Some('>'),
+        _=> None,
+    }
+}
+
 pub fn string_to_rune(s: &str) -> String {
     let mut output = String::new();
     for c in s.chars() {
@@ -39,6 +65,74 @@ pub fn string_to_rune(s: &str) -> String {
         // output.push(c);
     }
     output
+}
+
+pub fn to_word(s: &str) -> Result::<Word, String> {
+    let mut word = 0;
+    let mut i = 0;
+    for c in s.chars() {
+        if let Some(r) = rune_to_char(c) {
+            match r {
+                '0'..='9' | 'a'..='f' | 'A'..='F' => {
+                    word <<= 4;
+                    word |= r.to_digit(16).unwrap() as u16;
+                    i += 1;
+                }
+                _ => {}
+            }
+        }
+    }
+    if i == 4 {
+        Ok(Word::new(word))
+    } else {
+        Err(format!("Invalid word length: {}", i))
+    }
+}
+
+pub fn rune_to_string(s: String) -> Result::<String, String> {
+    let words: Vec<[char; 4]> = Vec::new();
+    let mut output = String::new();
+    let mut buffer: [char; 4] = ['0'; 4];
+    let mut i = 0;
+    for c in s.chars() {
+        if let Some(r) = rune_to_char(c) {
+            match r {
+                '0'..='9' | 'a'..='f' | 'A'..='F' => {
+                    buffer[i] = r;
+                    i += 1;
+                    if i == 4 {
+                        for j in 0..4 {
+                            output.push(buffer[j] as char);
+                        }
+                        i = 0;
+                    }
+                }
+                'z' => {
+                    if i == 0 {
+                        output.push_str("0000");
+                    } else {
+
+                    }
+                    let num = buffer.iter().take(i).collect::<String>();
+                    if let Ok(num) = u16::from_str_radix(&num, 16) {
+                        for _ in 0..num {
+                            output.push_str("0000");
+                        }
+                    }
+                }
+                '*' => {
+                    if i > 0 && words.len() > 0 {
+                        let num = words.last().unwrap().iter().collect::<String>();
+                        let num = Word::from(num);
+                    } else {
+
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    Ok(output)
 }
 
 #[derive(Debug, Clone, Copy)]
