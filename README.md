@@ -38,3 +38,10 @@ Becomes:
 ```
 ᛈᚠᛟᛟᛟᛟᛃᚱᛜᛞᛖᛜᛗᛞᛞᛟᛚᛖᛟᛞᛟᚺᚺᛜᚺᚺᛈᛁᛁᚠᚾ×
 ```
+
+## Install
+
+Make sure rust is installed, and then run:
+```
+cargo install --git https://github.com/zeb-hicks/waverune
+```
