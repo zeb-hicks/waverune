@@ -105,6 +105,16 @@ fn main() -> Result<(), StdinError> {
             }
         }
         output.push_str(" ! restart");
+    } else if args.chat {
+        // Assume the input starts at 0x0
+        output.push_str("!vm clear write ");
+        let mut group_builder = WordGroupConstructor::new(words);
+        if let Some(groups) = group_builder.construct() {
+            for group in groups {
+                output.push_str(&group.to_string())
+            }
+        }
+        output.push_str(" ! restart");
     } else {
         // Output raw runes
         let mut group_builder = WordGroupConstructor::new(words);
