@@ -1,18 +1,32 @@
 # Waverune
-Tool for converting [WaveVM](https://github.com/Meisaka/MeiVM2/) hex bytecode into runes.
+Tool for converting [Wave2](https://github.com/Meisaka/MeiVM2/) hex bytecode into runes.
 
 Supports:
 - Basic hex to rune conversion
-- Repeat runs of zeroes
-- Repeat arbitrary values
+- Conversion of [w2s binary files](https://github.com/zeb-hicks/wave2_assembler).
+- Compress runs of zeroes
+- Compress arbitrary values
 - Sparse word high/low alignment
+- Output chat commands for convenience
 
 Todo:
 - Add a deflate mode for rune -> hex conversion
 - Clean this garbage fire of a codebase up
 
 ### Usage:
-`waverune <input_file> [-o <output_file>]`
+```
+waverune [OPTIONS] <INPUT>
+
+Arguments:
+  <INPUT>  Input file
+
+Options:
+  -b, --binary           Read input file as Wave2 binary format
+  -c, --chat             Output as chat command
+  -o, --output <OUTPUT>  Output file path
+  -h, --help             Print help
+  -V, --version          Print version
+```
 
 ### Example conversion:
 
