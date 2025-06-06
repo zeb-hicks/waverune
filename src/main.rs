@@ -220,7 +220,7 @@ fn hex_to_words(hex_string: String) -> Vec<Word> {
     let hex_string = hex_string.trim().replace(" ", "").replace("\n", "");
 
     for i in (0..hex_string.len()).step_by(4) {
-        let word_str = &hex_string[i..i + 4];
+        let word_str = &hex_string[i..(i + 4).min(hex_string.len())];
         let word = Word::new(u16::from_str_radix(word_str, 16).unwrap());
         words.push(word);
     }
