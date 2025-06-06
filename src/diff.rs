@@ -1,6 +1,7 @@
+#[allow(unused)]
 pub fn diff(a: Vec<u8>, b: Vec<u8>) -> Vec<(usize, Vec<u8>)> {
     let mut c = Vec::new();
-    let mut diffs = Vec::new();
+    let diffs = Vec::new();
 
     c.resize(a.len().max(b.len()), None);
 
@@ -19,7 +20,7 @@ pub fn diff(a: Vec<u8>, b: Vec<u8>) -> Vec<(usize, Vec<u8>)> {
         };
     }
 
-    let mut i = 0;
+    let i = 0;
     while i < max {
 
     }

@@ -49,7 +49,7 @@ fn main() -> Result<(), StdinError> {
         let file = parse_binary_file(buffer).expect("Failed to parse binary file");
 
         let size = match (file.memory_start, file.code_start) {
-            (0, _) => 0,
+            (0, 0) => 0,
             (_, 0) => file.memory.len(),
             (_, _) => 0x40 + file.code.len()
         };

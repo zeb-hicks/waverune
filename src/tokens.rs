@@ -28,6 +28,7 @@ pub fn char_to_rune(c: char) -> Option<char> {
     }
 }
 
+#[allow(unused)]
 pub fn rune_to_char(c: char) -> Option<char> {
     match c {
         'ᚺ' => Some('0'),
@@ -67,6 +68,7 @@ pub fn string_to_rune(s: &str) -> String {
     output
 }
 
+#[allow(unused)]
 pub fn to_word(s: &str) -> Result::<Word, String> {
     let mut word = 0;
     let mut i = 0;
@@ -89,6 +91,7 @@ pub fn to_word(s: &str) -> Result::<Word, String> {
     }
 }
 
+#[allow(unused)]
 pub fn rune_to_string(s: String) -> Result::<String, String> {
     let words: Vec<[char; 4]> = Vec::new();
     let mut output = String::new();
@@ -137,6 +140,10 @@ pub fn rune_to_string(s: String) -> Result::<String, String> {
 
 #[derive(Debug, Clone, Copy)]
 pub enum WordGroup {
+    #[allow(unused)]
+    Skip,
+    #[allow(unused)]
+    SkipChain(usize),
     Zero,
     ZeroChain(usize),
     Word(Word),
@@ -227,6 +234,7 @@ impl WordReader {
         self.index += count;
     }
 
+    #[allow(unused)]
     pub fn peek(&self) -> Option<Word> {
         if self.index >= self.words.len() {
             return None;
