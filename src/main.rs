@@ -1,6 +1,7 @@
 mod tokens;
 mod word;
 mod diff;
+mod reverse;
 
 use std::{io::Read, path::PathBuf};
 use clap_stdin::{FileOrStdin, StdinError};
@@ -9,11 +10,14 @@ use word::Word;
 use clap::Parser;
 use tokens::WordGroupConstructor;
 
+// use crate::tokens::{char_to_rune, WordGroup};
+use crate::reverse::reverse_write;
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
     /// Input file
-    #[arg()]
+    #[arg(default_value = "-")]
     input: FileOrStdin<Vec<u8>>,
     /// Read input file as Wave2 binary format
     #[arg(short, long, default_value_t = false)]
@@ -22,8 +26,13 @@ struct Args {
     #[arg(short, long, default_value_t = false)]
     chat: bool,
 
-    // #[arg(short, long, default_value_t = false)]
-    // reverse: bool,
+    /// Reverse runic encoding into the raw bytes as written
+    #[arg(short, long, default_value_t = false)]
+    reverse: bool,
+
+    /// Reverse encode the runes into a human readable representation
+    #[arg(short='R', long="read",  default_value_t = false)]
+    read_runes: bool,
 
     // #[arg(short, long)]
     // diff: Option<PathBuf>,
@@ -41,6 +50,30 @@ fn main() -> Result<(), StdinError> {
     let words;
     let mem_words;
     let code_words;
+
+    if args.read_runes {
+        let mut runes = String::new();
+        reader.read_to_string(&mut runes)?;
+
+        for c in runes.chars() {
+            print!("{}", match c {
+
+                _ => "?"
+            });
+        }
+    }
+    if args.reverse {
+        let mut runes = String::new();
+        reader.read_to_string(&mut runes)?;
+
+        let words = reverse_write(runes);
+
+        for chunk in words.chunks(16) {
+            let values: Vec<String> = chunk.iter().map(|word| word.to_string()).collect();
+            println!("{}", values.join(", "));
+        }
+        return Ok(())
+    }
 
     if args.binary {
         let mut buffer = Vec::new();

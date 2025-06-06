@@ -24,6 +24,7 @@ pub fn char_to_rune(c: char) -> Option<char> {
         'z' => Some('ᚠ'),
         '<' => Some('ᚲ'),
         '>' => Some('×'),
+        '_' => Some('ᚢ'),
         _=> None,
     }
 }
@@ -51,6 +52,7 @@ pub fn rune_to_char(c: char) -> Option<char> {
         'ᚠ' => Some('z'),
         'ᚲ' => Some('<'),
         '×' => Some('>'),
+        'ᚢ' => Some('_'),
         _=> None,
     }
 }
@@ -114,12 +116,11 @@ pub fn rune_to_string(s: String) -> Result::<String, String> {
                     if i == 0 {
                         output.push_str("0000");
                     } else {
-
-                    }
-                    let num = buffer.iter().take(i).collect::<String>();
-                    if let Ok(num) = u16::from_str_radix(&num, 16) {
-                        for _ in 0..num {
-                            output.push_str("0000");
+                        let num = buffer.iter().take(i).collect::<String>();
+                        if let Ok(num) = u16::from_str_radix(&num, 16) {
+                            for _ in 0..num {
+                                output.push_str("0000");
+                            }
                         }
                     }
                 }
@@ -127,6 +128,13 @@ pub fn rune_to_string(s: String) -> Result::<String, String> {
                     if i > 0 && words.len() > 0 {
                         let num = words.last().unwrap().iter().collect::<String>();
                         let num = Word::from(num);
+                    } else {
+
+                    }
+                }
+                '_' => {
+                    if i == 0 {
+
                     } else {
 
                     }
@@ -157,7 +165,9 @@ pub enum WordGroup {
 impl Display for WordGroup {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let hex = match self {
-            WordGroup::Zero => "1z".to_string(),
+            WordGroup::Skip => "_".to_string(),
+            WordGroup::SkipChain(count) => format!("{:x}_", count),
+            WordGroup::Zero => "z".to_string(),
             WordGroup::ZeroChain(count) => format!("{:x}z", count),
             WordGroup::Word(word) => format!("{:04x}", word.value()),
             WordGroup::WordChain(word, count) => format!("{:04x}{}*", word.value(), count),
@@ -176,6 +186,9 @@ impl Display for WordGroup {
 
 #[test]
 fn test_word_groups() {
+    assert_eq!(string_to_rune(&WordGroup::Skip.to_string()), "ᚢ");
+    assert_eq!(string_to_rune(&WordGroup::SkipChain(3).to_string()), "ᛃᚢ");
+    assert_eq!(string_to_rune(&WordGroup::Zero.to_string()), "ᚠ");
     assert_eq!(string_to_rune(&WordGroup::ZeroChain(3).to_string()), "ᛃᚠ");
     assert_eq!(string_to_rune(&WordGroup::Word(Word::new(0xdead)).to_string()), "ᛜᛞᛖᛜ");
     assert_eq!(string_to_rune(&WordGroup::HighNibble(0x5000, None).to_string()), "ᛇᚲ");
