@@ -1,7 +1,11 @@
 [package]
 name = "waverune"
-version = "0.1.1"
+version = "1.0.0"
 edition = "2024"
+license = "MIT"
+description = "Runic encoding tool for interfacing with the Wave2 VM"
+homepage = "https://nimphio.us/wave2/"
+repository = "https://github.com/zeb-hicks/waverune"
 
 [dependencies]
 clap = { version = "4.5.39", features = ["derive"] }
