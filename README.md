@@ -2,6 +2,7 @@
 Tool for converting [Wave2](https://github.com/Meisaka/MeiVM2/) hex bytecode into runes.
 
 ### See also:
+- https://nimphio.us/wave2/
 - https://github.com/Meisaka/MeiVM2/
 - https://github.com/zeb-hicks/wave2_assembler
 - https://marketplace.visualstudio.com/items?itemName=Nimphious.wave2-assembly
@@ -15,6 +16,7 @@ Supports:
 - Compress arbitrary values
 - Sparse word high/low alignment
 - Output chat commands for convenience
+- Split large chat commands into chunks
 
 Todo:
 - Add a deflate mode for rune -> hex conversion
@@ -30,6 +32,7 @@ Arguments:
 Options:
   -b, --binary           Read input file as Wave2 binary format
   -c, --chat             Output as chat command
+  -C, --color            Colorize the output
   -o, --output <OUTPUT>  Output file path
   -h, --help             Print help
   -V, --version          Print version
@@ -49,6 +52,11 @@ Becomes:
 ## Install
 
 Make sure rust is installed, and then run:
+```
+carto install waverune
+```
+
+Or to install directly from github:
 ```
 cargo install --git https://github.com/zeb-hicks/waverune
 ```

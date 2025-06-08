@@ -1,6 +1,6 @@
 [package]
 name = "waverune"
-version = "1.0.0"
+version = "1.0.1"
 edition = "2024"
 license = "MIT"
 description = "Runic encoding tool for interfacing with the Wave2 VM"
