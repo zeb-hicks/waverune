@@ -11,7 +11,16 @@ use clap::Parser;
 use tokens::WordGroupConstructor;
 
 // use crate::tokens::{char_to_rune, WordGroup};
-use crate::reverse::reverse_write;
+use crate::{reverse::reverse_write, tokens::{string_to_rune, WordGroup}};
+
+#[allow(unused)]
+const ANSI_RESET: &str = "\x1B[0m";
+#[allow(unused)]
+const ANSI_WHITE: &str = "\x1B[97m";
+#[allow(unused)]
+const ANSI_GREY: &str = "\x1B[37m";
+#[allow(unused)]
+const ANSI_BLUE: &str = "\x1B[34m";
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -25,6 +34,10 @@ struct Args {
     /// Output as chat command
     #[arg(short, long, default_value_t = false)]
     chat: bool,
+
+    /// Colorize output
+    #[arg(short = 'C', long = "color", default_value_t = false)]
+    color: bool,
 
     /// Reverse runic encoding into the raw bytes as written
     #[arg(short, long, default_value_t = false)]
@@ -57,7 +70,14 @@ fn main() -> Result<(), StdinError> {
 
         for c in runes.chars() {
             print!("{}", match c {
-
+                'ᚺ' => "0", 'ᚾ' => "1", 'ᛁ' => "2", 'ᛃ' => "3",
+                'ᛈ' => "4", 'ᛇ' => "5", 'ᛉ' => "6", 'ᛊ' => "7",
+                'ᛏ' => "8", 'ᛒ' => "9", 'ᛖ' => "a", 'ᛗ' => "b",
+                'ᛚ' => "c", 'ᛜ' => "d", 'ᛞ' => "e", 'ᛟ' => "f",
+                'ᚱ' => "*", 'ᚠ' => "z",
+                'ᚲ' => "<", '×' => ">",
+                'ᚢ' => "_",
+                '\n' | ' ' => "",
                 _ => "?"
             });
         }
@@ -84,7 +104,7 @@ fn main() -> Result<(), StdinError> {
         let size = match (file.memory_start, file.code_start) {
             (0, 0) => 0,
             (_, 0) => file.memory.len(),
-            (_, _) => 0x40 + file.code.len()
+            (_, _) => 0x80 + file.code.len()
         };
         let mut bytes = Vec::new();
         bytes.resize(size, 0);
@@ -93,7 +113,7 @@ fn main() -> Result<(), StdinError> {
             bytes[i] = file.memory[i];
         }
         for i in 0..file.code.len() {
-            bytes[i + 0x40] = file.code[i];
+            bytes[i + 0x80] = file.code[i];
         }
 
         words = binary_to_words(bytes);
@@ -108,8 +128,6 @@ fn main() -> Result<(), StdinError> {
         code_words = Vec::new();
     }
 
-    let mut output = String::new();
-
     // TODO: Implement decompiling runes
 
     // TODO: Implement binary diffing
@@ -119,43 +137,45 @@ fn main() -> Result<(), StdinError> {
 
     // }
 
-    if args.chat && mem_words.len() > 0 {
-        // Format output as chat comman !vm clear write <mem> ! code <code> ! restart
-        let mut mem_builder = WordGroupConstructor::new(mem_words);
-        output.push_str("!vm clear write ");
-        if let Some(groups) = mem_builder.construct() {
-            for group in groups {
-                output.push_str(&group.to_string())
-            }
-        }
-        if code_words.len() > 0 {
-            output.push_str(" ! code ");
-            let mut code_builder = WordGroupConstructor::new(code_words);
-            if let Some(groups) = code_builder.construct() {
-                for group in groups {
-                    output.push_str(&group.to_string())
+    let mut output = String::new();
+
+    let mem_groups = WordGroupConstructor::new(mem_words).construct();
+    let code_groups = WordGroupConstructor::new(code_words).construct();
+
+    const CHUNK_LIMIT: usize = 64;
+
+    if args.chat {
+        if words.len() > CHUNK_LIMIT {
+            // Split long sequences into multiple commands.
+            let mut offset = 0;
+            let mut first = true;
+            for chunk in words.chunks(CHUNK_LIMIT) {
+                if !first { output += "\n"; }
+                let mut chunk = chunk.to_vec();
+                if first {
+                    // If writing 0 to PC, write 0x40 instead.
+                    if chunk[0x3d].value() == 0 {
+                        chunk[0x3d] = Word::new(0x40);
+                    }
                 }
+                let mut ctor = WordGroupConstructor::new(chunk);
+                let groups = ctor.construct().unwrap();
+                output += &write_command(first, false, offset, Some(words_to_string(groups, args.color)), None);
+                offset += ctor.word_count;
+                first = false;
+            }
+            output += " ! restart";
+        } else {
+            output = match (mem_groups, code_groups) {
+                (Some(mem), None) => write_command(true, true, 0, Some(words_to_string(mem, args.color)), None),
+                (None, Some(code)) => write_command(true, true, 0, None, Some(words_to_string(code, args.color))),
+                (Some(mem), Some(code)) => write_command(true, true, 0, Some(words_to_string(mem, args.color)), Some(words_to_string(code, args.color))),
+                _ => output
             }
         }
-        output.push_str(" ! restart");
-    } else if args.chat {
-        // Assume the input starts at 0x0
-        output.push_str("!vm clear write ");
-        let mut group_builder = WordGroupConstructor::new(words);
-        if let Some(groups) = group_builder.construct() {
-            for group in groups {
-                output.push_str(&group.to_string())
-            }
-        }
-        output.push_str(" ! restart");
     } else {
-        // Output raw runes
-        let mut group_builder = WordGroupConstructor::new(words);
-        if let Some(groups) = group_builder.construct() {
-            for group in groups {
-                output.push_str(&group.to_string())
-            }
-        }
+        let all_groups = WordGroupConstructor::new(words).construct().unwrap();
+        output = words_to_string(all_groups, args.color);
     }
 
     if let Some(output_path) = args.output {
@@ -164,6 +184,92 @@ fn main() -> Result<(), StdinError> {
         println!("{}", output);
     }
     Ok(())
+}
+
+fn words_to_string(words: Vec<WordGroup>, color: bool) -> String {
+    let mut out = String::new();
+    let mut bright = true;
+    for group in words {
+        if color { out += if bright { ANSI_WHITE } else { ANSI_BLUE }; }
+        out += group.to_string().as_str();
+        if color { out += ANSI_RESET; }
+        bright = !bright;
+    }
+    out
+}
+
+fn write_command(clear: bool, reset: bool, offset: u16, mem: Option<String>, code: Option<String>) -> String {
+    let mut out = String::new();
+
+    out += if clear { "!vm clear " }
+           else     { "!vm " };
+
+    match (offset, mem, code) {
+        (0, Some(mem), Some(code)) => {
+            out += "write ";
+            out += &mem;
+            out += " ! code ";
+            out += &code;
+        }
+        (0, Some(mem), None) => {
+            out += "write ";
+            out += &mem;
+        }
+        (0x40, Some(code), None) |
+        (0, None, Some(code)) => {
+            out += "code ";
+            out += &code;
+        }
+        (offset, Some(mem), None) => {
+            out += "write ";
+            out += make_rune_offset(offset).as_str();
+            out += &mem;
+        }
+        _ => {} // ???
+    }
+
+    if reset { out += " ! reset" }
+
+    out
+}
+
+#[test]
+fn text_write_command() {
+    assert_eq!(write_command(true,  false, 0,     Some("ᚾᛁᛃᛈ".to_string()), None), "!vm clear write ᚾᛁᛃᛈ");
+    assert_eq!(write_command(true,  false, 0,     None, Some("ᚾᛁᛃᛈ".to_string())), "!vm clear code ᚾᛁᛃᛈ");
+    assert_eq!(write_command(true,  true,  0,     Some("ᚾᛁᛃᛈ".to_string()), None), "!vm clear write ᚾᛁᛃᛈ ! reset");
+    assert_eq!(write_command(true,  true,  0,     None, Some("ᚾᛁᛃᛈ".to_string())), "!vm clear code ᚾᛁᛃᛈ ! reset");
+    assert_eq!(write_command(true,  true,  0,     Some("1234".to_string()), Some("5678".to_string())), "!vm clear write 1234 ! code 5678 ! reset");
+    assert_eq!(write_command(true,  true,  0x40,  Some("1234".to_string()), None), "!vm clear code 1234 ! reset");
+    assert_eq!(write_command(true,  true,  0x200, Some("ᚾᛁᛃᛈ".to_string()), None), "!vm clear write ᛁᚺᚺᚢᚾᛁᛃᛈ ! reset");
+}
+
+fn make_rune_offset(offset: u16) -> String {
+    let mut off = offset;
+    let mut out = String::new();
+    while off > 0 {
+        let diff = off.min(0xfff);
+        out += string_to_rune(format!("{:0x}ᚢ", diff).as_str()).as_str();
+        off -= diff;
+    }
+    out
+}
+
+#[test]
+fn test_make_rune_offset() {
+    assert_eq!(make_rune_offset(0x000), "");
+    assert_eq!(make_rune_offset(0x001), "ᚾᚢ");
+    assert_eq!(make_rune_offset(0x00f), "ᛟᚢ");
+    assert_eq!(make_rune_offset(0x010), "ᚾᚺᚢ");
+    assert_eq!(make_rune_offset(0x100), "ᚾᚺᚺᚢ");
+    assert_eq!(make_rune_offset(0x123), "ᚾᛁᛃᚢ");
+    assert_eq!(make_rune_offset(0x2000), "ᛟᛟᛟᚢᛟᛟᛟᚢᛁᚢ");
+}
+
+#[allow(unused)]
+struct MemoryChunk {
+    pub words: Vec<WordGroup>,
+    pub offset: u16,
 }
 
 struct BinaryFile {

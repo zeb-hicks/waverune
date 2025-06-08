@@ -276,11 +276,12 @@ impl WordReader {
 pub struct WordGroupConstructor {
     reader: WordReader,
     groups: Vec<WordGroup>,
+    pub word_count: u16,
 }
 
 impl WordGroupConstructor {
     pub fn new(words: Vec<Word>) -> Self {
-        WordGroupConstructor { reader: WordReader::new(words.clone()), groups: Vec::new() }
+        WordGroupConstructor { reader: WordReader::new(words.clone()), groups: Vec::new(), word_count: 0 }
     }
 
     pub fn construct(&mut self) -> Option<Vec<WordGroup>> {
@@ -313,6 +314,8 @@ impl WordGroupConstructor {
             });
             self.reader.advance(repeats);
         }
+
+        self.word_count = self.reader.index as u16;
 
         Some(self.groups.clone())
     }
